@@ -26,10 +26,18 @@ export default function FeedbackForm({ onDone, onFindNew }) {
     );
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // In a real app, you'd send this to your backend
-    console.log('Feedback submitted:', { rating, selectedTags, comment });
+    try {
+      const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
+      await fetch(`${SERVER_URL}/api/feedback`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating, selectedTags, comment })
+      });
+    } catch (err) {
+      console.error('Failed to submit feedback', err);
+    }
     setSubmitted(true);
   };
 

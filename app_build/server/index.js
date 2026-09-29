@@ -9,6 +9,7 @@ const { broadcastOnlineCount } = require('./presence');
 
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 const PORT = process.env.PORT || 3001;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 
 const app = express();
 app.use(cors({ origin: CLIENT_ORIGIN }));
@@ -16,6 +17,30 @@ app.use(express.json());
 
 // Health check
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
+// ─── Feedback Store & API ──────────────────────────────────────────────────
+const feedbacks = []; // In-memory store for feedbacks
+
+app.post('/api/feedback', (req, res) => {
+  const { rating, selectedTags, comment } = req.body;
+  const newFeedback = {
+    id: Date.now().toString(),
+    rating,
+    selectedTags: selectedTags || [],
+    comment: comment || '',
+    timestamp: new Date().toISOString()
+  };
+  feedbacks.unshift(newFeedback); // Add to beginning
+  res.status(201).json({ success: true, feedback: newFeedback });
+});
+
+app.get('/api/feedback', (req, res) => {
+  const providedPassword = req.headers['x-admin-password'];
+  if (providedPassword !== ADMIN_PASSWORD) {
+    return res.status(401).json({ success: false, message: 'Unauthorized: Incorrect password' });
+  }
+  res.json({ success: true, feedbacks });
+});
 
 const server = http.createServer(app);
 const io = new Server(server, {

@@ -10,6 +10,7 @@ import ChatWindow from './components/ChatWindow';
 import FeedbackForm from './components/FeedbackForm';
 import ShinyText from './components/ShinyText';
 import AnimatedBackground from './components/AnimatedBackground';
+import AdminPanel from './components/AdminPanel';
 
 // 'form' | 'queue' | 'chat' | 'feedback'
 const pageVariants = {
@@ -57,6 +58,11 @@ export default function App() {
 
   const handleFeedbackDone = () => setAppState('form');
 
+  // Check if we should render admin panel
+  if (typeof window !== 'undefined' && window.location.search.includes('admin=true')) {
+    return <AdminPanel />;
+  }
+
   return (
     <div className="app-layout">
       {/* ── Animated pixel trail bg ──────────────── */}
@@ -73,7 +79,25 @@ export default function App() {
             spread={100}
           />
         </div>
-        <OnlineCounter count={onlineCount} isConnected={isConnected} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button 
+            onClick={() => setAppState('feedback')}
+            style={{
+              padding: '6px 12px',
+              fontSize: '0.8125rem',
+              fontWeight: 600,
+              background: '#eff6ff',
+              color: '#2563eb',
+              border: '1px solid #dbeafe',
+              borderRadius: '999px',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+          >
+            Leave a Review
+          </button>
+          <OnlineCounter count={onlineCount} isConnected={isConnected} />
+        </div>
       </header>
 
       {/* ── Main ─────────────────────────────────── */}
